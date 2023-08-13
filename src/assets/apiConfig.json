@@ -1,0 +1,6 @@
+{
+  "api_key": "180aff8985c4d1be039fb47bf05ae0a3",
+  "location_api": "http://api.openweathermap.org/geo/1.0/",
+  "weather_api": "https://api.openweathermap.org/data/2.5/",
+  "icon_url": "https://openweathermap.org/img/wn/"
+}

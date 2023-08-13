@@ -1,0 +1,27 @@
+<div class="container">
+  <div class="mat-typography title">
+    <h1>
+      Current weather in <b>{{ name }}, {{ country }}</b>
+    </h1>
+  </div>
+  <mat-card class="main">
+    <mat-card-content class="content">
+      <div>
+        <p>{{ currentWeather.main.temp }}&deg;C</p>
+        <img [src]="iconUrl" alt="Current weather icon" />
+        <p>
+          {{ currentWeather.weather[0].main }}:
+          {{ currentWeather.weather[0].description }}
+        </p>
+      </div>
+      <div>
+        <p>Feels like: {{ currentWeather.main.feels_like }}&deg;C</p>
+        <p>Pressure: {{ currentWeather.main.pressure }} hPa</p>
+        <p>Humidity: {{ currentWeather.main.humidity }}%</p>
+        <p>Wind: {{ currentWeather.wind.speed }} km/h</p>
+        <p>Clouds: {{ currentWeather.clouds.all }}%</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <button mat-stroked-button [routerLink]="'/'">Check another location</button>
+</div>
