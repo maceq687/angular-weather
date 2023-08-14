@@ -13,8 +13,6 @@ export class WeatherDisplayComponent implements OnInit {
   api = apiConfig;
   name: string = 'City';
   country: string = 'Country';
-  lat: number = 0;
-  lon: number = 0;
   currentWeather: Weather = tempData as unknown as Weather;
   iconUrl = this.api.icon_url;
   temperature: number = 0;
@@ -30,32 +28,36 @@ export class WeatherDisplayComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       this.name = params?.['name'];
       this.country = params?.['country'];
-      this.lat = params?.['lat'];
-      this.lon = params?.['lon'];
+      var lat = params?.['lat'];
+      var lon = params?.['lon'];
       var url =
         this.api.weather_api +
         'weather?lat=' +
-        this.lat +
+        lat +
         '&lon=' +
-        this.lon +
+        lon +
         '&appid=' +
         this.api.api_key +
         '&units=metric';
-      this.apiService.get(url).subscribe({
-        next: (data) => {
-          this.currentWeather = data as unknown as Weather;
-        },
-        complete: () => {
-          this.iconUrl =
-            this.iconUrl + this.currentWeather.weather[0].icon + '@2x.png';
-          this.temperature = Math.round(this.currentWeather.main.temp);
-          this.temperatureFeelsLike = Math.round(
-            this.currentWeather.main.feels_like
-          );
-          this.loaded = true;
-        },
-        error: (err) => console.error(err),
-      });
+      if (url.includes('undefined')) {
+        console.error('Missing parameters in query');
+      } else {
+        this.apiService.get(url).subscribe({
+          next: (data) => {
+            this.currentWeather = data as unknown as Weather;
+          },
+          complete: () => {
+            this.iconUrl =
+              this.iconUrl + this.currentWeather.weather[0].icon + '@2x.png';
+            this.temperature = Math.round(this.currentWeather.main.temp);
+            this.temperatureFeelsLike = Math.round(
+              this.currentWeather.main.feels_like
+            );
+            this.loaded = true;
+          },
+          error: (err) => console.error(err),
+        });
+      }
     });
   }
 }

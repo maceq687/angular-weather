@@ -21,7 +21,6 @@ export class SearchLocationComponent {
   constructor(private apiService: ApiHttpService, private router: Router) {}
 
   getLocations(cityCountry: string) {
-    this.searched = true;
     var location = cityCountry.split(',', 2);
     var trimLocation = location.map((element) => {
       return element.trim();
@@ -36,15 +35,20 @@ export class SearchLocationComponent {
       country +
       '&limit=3&appid=' +
       this.api.api_key;
-    this.apiService.get(url).subscribe({
-      next: (data) => {
-        this.dataSource = data as unknown as Location[];
-      },
-      complete: () => {
-        this.loaded = true;
-      },
-      error: (err) => console.error(err),
-    });
+    if (!city) {
+      console.error('Missing parameters in query');
+    } else {
+      this.searched = true;
+      this.apiService.get(url).subscribe({
+        next: (data) => {
+          this.dataSource = data as unknown as Location[];
+        },
+        complete: () => {
+          this.loaded = true;
+        },
+        error: (err) => console.error(err),
+      });
+    }
   }
 
   selectedLocation(selectedLocation: Location) {
