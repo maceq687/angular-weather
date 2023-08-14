@@ -17,6 +17,9 @@ export class WeatherDisplayComponent implements OnInit {
   lon: number = 0;
   currentWeather: Weather = tempData as unknown as Weather;
   iconUrl = this.api.icon_url;
+  temperature: number = 0;
+  temperatureFeelsLike: number = 0;
+  loaded = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -38,12 +41,21 @@ export class WeatherDisplayComponent implements OnInit {
         '&appid=' +
         this.api.api_key +
         '&units=metric';
-      console.log(this.currentWeather);
-      this.apiService.get(url).subscribe((data) => {
-        this.currentWeather = data as unknown as Weather;
+      this.apiService.get(url).subscribe({
+        next: (data) => {
+          this.currentWeather = data as unknown as Weather;
+        },
+        complete: () => {
+          this.iconUrl =
+            this.iconUrl + this.currentWeather.weather[0].icon + '@2x.png';
+          this.temperature = Math.round(this.currentWeather.main.temp);
+          this.temperatureFeelsLike = Math.round(
+            this.currentWeather.main.feels_like
+          );
+          this.loaded = true;
+        },
+        error: (err) => console.error(err),
       });
-      this.iconUrl =
-        this.api.icon_url + this.currentWeather.weather[0].icon + '@2x.png';
     });
   }
 }
