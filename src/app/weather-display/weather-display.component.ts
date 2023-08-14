@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import apiConfig from '../../assets/apiConfig.json';
-import tempData from '../../assets/weather.json';
+import { ActivatedRoute, Params } from '@angular/router';
 import { ApiHttpService } from '../services/api-http.service';
+import { getIconUrl, getUrlFromParams } from '../services/url-paths';
 
 @Component({
   selector: 'app-weather-display',
@@ -10,14 +9,13 @@ import { ApiHttpService } from '../services/api-http.service';
   styleUrls: ['./weather-display.component.sass'],
 })
 export class WeatherDisplayComponent implements OnInit {
-  api = apiConfig;
-  name: string = 'City';
-  country: string = 'Country';
-  currentWeather: Weather = tempData as unknown as Weather;
-  iconUrl = this.api.icon_url;
+  name = '';
+  country = '';
+  currentWeather: Weather = {} as Weather;
   temperature: number = 0;
   temperatureFeelsLike: number = 0;
   loaded = false;
+  iconUrl = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -26,43 +24,49 @@ export class WeatherDisplayComponent implements OnInit {
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      this.name = params?.['name'];
-      this.country = params?.['country'];
-      var lat = params?.['lat'];
-      var lon = params?.['lon'];
-      var url =
-        this.api.weather_api +
-        'weather?lat=' +
-        lat +
-        '&lon=' +
-        lon +
-        '&appid=' +
-        this.api.api_key +
-        '&units=metric';
-      if (url.includes('undefined')) {
+      const info = getInfoFromParams(params);
+      if (!info) {
         console.error('Missing parameters in query');
-      } else {
-        this.apiService.get(url).subscribe({
-          next: (data) => {
-            this.currentWeather = data as unknown as Weather;
-          },
-          complete: () => {
-            this.iconUrl =
-              this.iconUrl + this.currentWeather.weather[0].icon + '@2x.png';
-            this.temperature = Math.round(this.currentWeather.main.temp);
-            this.temperatureFeelsLike = Math.round(
-              this.currentWeather.main.feels_like
-            );
-            this.loaded = true;
-          },
-          error: (err) => console.error(err),
-        });
+        return;
       }
+      this.name = info.name;
+      this.country = info.country;
+
+      const fetchUrl = getUrlFromParams(info.latitude, info.longitude);
+
+      this.apiService.get(fetchUrl).subscribe({
+        next: (data) => {
+          this.currentWeather = data as unknown as Weather;
+        },
+        complete: () => {
+          this.iconUrl = getIconUrl(this.currentWeather.weather[0].icon);
+          this.temperature = Math.round(this.currentWeather.main.temp);
+          this.temperatureFeelsLike = Math.round(
+            this.currentWeather.main.feels_like
+          );
+          this.loaded = true;
+        },
+        error: (err) => console.error(err),
+      });
     });
   }
 }
 
-export interface Weather {
+export function getInfoFromParams(params: Params) {
+  const name = params['name'];
+  const country = params?.['country'];
+  const latitude = params?.['lat'];
+  const longitude = params?.['lon'];
+  if (!params && !name && !country && !latitude && !longitude) return null;
+  return {
+    name,
+    country,
+    latitude,
+    longitude,
+  };
+}
+
+interface Weather {
   coord: {};
   weather: [
     {

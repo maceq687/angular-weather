@@ -1,10 +1,7 @@
 import { ApiHttpService } from './../services/api-http.service';
 import { Component } from '@angular/core';
-import tempData from '../../assets/location.json';
-import apiConfig from '../../assets/apiConfig.json';
 import { Router } from '@angular/router';
-
-const LocationsData: Location[] = tempData;
+import { getFetchUrl } from '../services/url-paths';
 
 @Component({
   selector: 'app-search-location',
@@ -15,40 +12,29 @@ export class SearchLocationComponent {
   searched = false;
   loaded = false;
   displayedColumns: string[] = ['name', 'country'];
-  dataSource = LocationsData;
-  api = apiConfig;
+  dataSource:Location[] = [];
 
   constructor(private apiService: ApiHttpService, private router: Router) {}
 
   getLocations(cityCountry: string) {
-    var location = cityCountry.split(',', 2);
-    var trimLocation = location.map((element) => {
-      return element.trim();
-    });
-    var city = trimLocation[0];
-    var country = trimLocation[1];
-    var url =
-      this.api.location_api +
-      'direct?q=' +
-      city +
-      ',,' +
-      country +
-      '&limit=3&appid=' +
-      this.api.api_key;
+    const data = getCityAndCountry(cityCountry);
+    const city = data.city;
     if (!city) {
       console.error('Missing parameters in query');
-    } else {
-      this.searched = true;
-      this.apiService.get(url).subscribe({
-        next: (data) => {
-          this.dataSource = data as unknown as Location[];
-        },
-        complete: () => {
-          this.loaded = true;
-        },
-        error: (err) => console.error(err),
-      });
+      return;
     }
+    const country = data.country;
+    const fetchUrl = getFetchUrl(city, country);
+    this.searched = true;
+    this.apiService.get(fetchUrl).subscribe({
+      next: (data) => {
+        this.dataSource = data as unknown as Location[];
+      },
+      complete: () => {
+        this.loaded = true;
+      },
+      error: (err) => console.error(err),
+    });
   }
 
   selectedLocation(selectedLocation: Location) {
@@ -63,7 +49,18 @@ export class SearchLocationComponent {
   }
 }
 
-export interface Location {
+export function getCityAndCountry(inputString: string) {
+  const location = inputString.split(',', 2);
+  const trimmedLocation = location.map((element) => {
+    return element.trim();
+  });
+  return {
+    city: trimmedLocation[0],
+    country: trimmedLocation[1],
+  };
+}
+
+interface Location {
   name: string;
   local_names?: {};
   lat: number;
