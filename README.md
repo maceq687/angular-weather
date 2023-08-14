@@ -58,3 +58,8 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 ## Running end-to-end tests
 
 Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+
+## Build for gh-pages
+
+Run `ng build --base-href "https://maceq687.github.io/angular-weather/"` to build the project.  
+Run `npx angular-cli-ghpages --dir=dist/angular-weather` to publish the build.
