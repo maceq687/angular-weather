@@ -57,7 +57,7 @@ export function getInfoFromParams(params: Params) {
   const country = params?.['country'];
   const latitude = params?.['lat'];
   const longitude = params?.['lon'];
-  if (!params && !name && !country && !latitude && !longitude) return null;
+  if (!params || !name || !country || !latitude || !longitude) return null;
   return {
     name,
     country,
